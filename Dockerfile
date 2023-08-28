@@ -105,6 +105,22 @@ RUN set -eux; \
 	chmod +x bin/console; sync;
 
 
+# Dev PHP image
+FROM php_base AS php_consumer
+
+ENV APP_ENV=dev XDEBUG_MODE=off
+VOLUME /srv/app/var/
+
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+RUN set -eux; \
+	install-php-extensions \
+    	xdebug \
+    ;
+
+COPY --link docker/php/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
+CMD ["php", "bin/console", "app:consume-messages"]
+
 # Base Caddy image
 FROM caddy_upstream AS caddy_base
 
